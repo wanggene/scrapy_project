@@ -1,4 +1,4 @@
-from scrapy import Spider
+from scrapy import Spider, Request
 from scrapy.selector import Selector
 from realtor.items import RealtorItem
 
@@ -27,7 +27,7 @@ class RealtorSpider(Spider):
 			# return content.encode('ascii','ignore')
 	
 	def parse(self, response):
-		for 
+		self.log('I just visited: ' + response.url)   # added
 
 
 		rows = response.xpath('//*[@data-status = "recently_sold"]')
@@ -89,11 +89,14 @@ class RealtorSpider(Spider):
 
 			yield item
 
+		# following pagination link
+
+		next_page_url = response.xpath('.//span[@class="page current"]/following-sibling::span/a/@href').extract_first()
+		if next_page_url:
+			next_page_url = response.urljoin(next_page_url)
+			yield Request(url = next_page_url, callback = self.parse)
 
 	
-
-
-
 
 
 
