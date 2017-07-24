@@ -14,7 +14,7 @@ BOT_NAME = 'realtor'
 SPIDER_MODULES = ['realtor.spiders']
 NEWSPIDER_MODULE = 'realtor.spiders'
 
-#DOWNLOAD_DELAY = 3
+#DOWNLOAD_DELAY = 
 
 ITEM_PIPELINES = {#'realtor.pipelines.ValidateItemPipeline': 100,
                   'realtor.pipelines.WriteItemPipeline': 200}

@@ -6,8 +6,8 @@ from realtor.items import RealtorItem
 class RealtorSpider(Spider):
 	name = "realtor_spider" 
 	allowed_urls = ['http://www.realtor.com']
-	start_urls = ['http://www.realtor.com/soldhomeprices/Flushing_NY?pgsz=50']
-#				   http://www.realtor.com/soldhomeprices/Flushing_NY/pg-2?pgsz=50
+#	start_urls = ['http://www.realtor.com/soldhomeprices/Flushing_NY?pgsz=50']
+	start_urls = ['http://www.realtor.com/soldhomeprices/Flushing_NY/pg-2?pgsz=50']
 
 
 
@@ -79,10 +79,10 @@ class RealtorSpider(Spider):
 
 		# following pagination link
 
-#		next_page_url = response.xpath('.//span[@class="page current"]/following-sibling::span/a/@href').extract_first()
-#		if next_page_url:
-#			next_page_url = response.urljoin(next_page_url)
-#			yield Request(url = next_page_url, callback = self.parse)
+	#	next_page_url = response.xpath('.//span[@class="page current"]/following-sibling::span/a/@href').extract_first()
+	#	if next_page_url:
+	#		next_page_url = response.urljoin(next_page_url)
+	#		yield Request(url = next_page_url, callback = self.parse)
 
 
 	def parse_details(self, response):
@@ -111,6 +111,8 @@ class RealtorSpider(Spider):
 
 		price_change = details.xpath('./div/div[3]/div/div/div[2]/div/text()').extract_first()
 		price_trend = details.xpath('./div/div[3]/div/div/div[2]/span/text()').extract_first()
+
+
 
 		# lat 
 		#location = esponse.xpath('//*[@id="ldp-amenities-map-container"]')
