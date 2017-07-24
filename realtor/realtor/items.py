@@ -24,6 +24,14 @@ class RealtorItem(scrapy.Item):
 	lotsize = scrapy.Field() #
 	lotunit = scrapy.Field() #
 
+
+	percent_Nearby = scrapy.Field()
+	trend_Nearby = scrapy.Field()
+	days_onmarket = scrapy.Field()
+	onmarket = scrapy.Field()
+	price_change = scrapy.Field()
+	price_trend = scrapy.Field()
+
     # item in 
     #priceCompare = scrapy.Field()
     #listingTime = scrapy.Field()

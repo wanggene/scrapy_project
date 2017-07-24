@@ -6,7 +6,6 @@ from realtor.items import RealtorItem
 class RealtorSpider(Spider):
 	name = "realtor_spider" 
 	allowed_urls = ['http://www.realtor.com']
-
 	start_urls = ['http://www.realtor.com/soldhomeprices/Flushing_NY?pgsz=50']
 #				   http://www.realtor.com/soldhomeprices/Flushing_NY/pg-2?pgsz=50
 
@@ -27,9 +26,7 @@ class RealtorSpider(Spider):
 			# return content.encode('ascii','ignore')
 	
 	def parse(self, response):
-		self.log('I just visited: ' + response.url)   # added
-
-
+#		self.log('I just visited: ' + response.url)   # added
 		rows = response.xpath('//*[@data-status = "recently_sold"]')
 		
 		for i in range(1, len(rows)):
@@ -51,6 +48,11 @@ class RealtorSpider(Spider):
 			lotunit = rows[i].xpath('./div[1]/div[2]/div/div[6]/ul/li[4]/text()').extract_first()
 			detailslink= rows[i].xpath('./div[1]/div[2]/div/div/a/@href').extract_first()
 
+			if detailslink:
+				details_url = response.urljoin(detailslink)
+				yield Request(url = details_url, callback = self.parse_details)
+
+
 			# verify 
 			propertyid = self.verify(propertyid)
 			address = self.verify(address)
@@ -68,46 +70,68 @@ class RealtorSpider(Spider):
 			detailslink = self.verify(detailslink)
 
 
+# details
+			percent_Nearby = self.verify(percent_Nearby)
+			trend_Nearby = self.verify(trend_Nearby)
+			days_onmarket = self.verify(days_onmarket)
+			onmarket = self.verify(onmarket)
+			price_change = self.verify(price_change)
+			price_trend = self.verify(price_trend)
 
+
+
+# item
 			item = RealtorItem()
 			item['propertyid'] = propertyid
 			item['address'] = address
 			item['city'] = city
 			item['soldPrice'] = soldPrice
 			item['soldDate'] = soldDate
-
 			item['state'] = state
 			item['zipcode'] = zipcode
 			item['propertyType'] = propertyType
 			item['bedroom'] = bedroom
 			item['bathroom'] = bathroom
-
 			item['floorsize'] = floorsize
 			item['lotsize'] = lotsize
 			item['lotunit'] = lotunit
 			item['detailslink'] = detailslink
 
+			item['percent_Nearby'] = percent_Nearby
+			item['trend_Nearby'] = trend_Nearby
+			item['days_onmarket'] = days_onmarket
+			item['onmarket'] = onmarket
+			item['price_change'] = price_change
+			item['price_trend'] = price_trend
+
+
 			yield item
+
+
 
 		# following pagination link
 
-		next_page_url = response.xpath('.//span[@class="page current"]/following-sibling::span/a/@href').extract_first()
-		if next_page_url:
-			next_page_url = response.urljoin(next_page_url)
-			yield Request(url = next_page_url, callback = self.parse)
-
-	
+#		next_page_url = response.xpath('.//span[@class="page current"]/following-sibling::span/a/@href').extract_first()
+#		if next_page_url:
+#			next_page_url = response.urljoin(next_page_url)
+#			yield Request(url = next_page_url, callback = self.parse)
 
 
+	def parse_details(self, response):
+		details = response.xpath('//*[@id="market-summary-data"]')
 
+		percent_Nearby = details.xpath('./div/div[1]/div/div/div[2]/div/text()').extract_first()
+		trend_Nearby = details.xpath('./div/div[1]/div/div/div[2]/span/text()').extract_first()
 
+		days_onmarket = details.xpath('./div/div[2]/div/div/div[2]/div/text()').extract_first()
+		onmarket = details.xpath('./div/div[2]/div/div/div[2]/span/text()').extract_first()
 
+		price_change = details.xpath('./div/div[3]/div/div/div[2]/div/text()').extract_first()
+		price_trend = details.xpath('./div/div[3]/div/div/div[2]/span/text()').extract_first()
 
-
-
-
-
-
+		# verify details
+		location = esponse.xpath('//*[@id="ldp-amenities-map-container"]')
+		lat = location.xpath('./div/@data-property-lat').extract_first()
 
 
 
