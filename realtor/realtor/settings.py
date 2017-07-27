@@ -14,7 +14,7 @@ BOT_NAME = 'realtor'
 SPIDER_MODULES = ['realtor.spiders']
 NEWSPIDER_MODULE = 'realtor.spiders'
 
-DOWNLOAD_DELAY = 8
+DOWNLOAD_DELAY = 10
 # To run: scrapy crawl realtor_spider
 
 ITEM_PIPELINES = {#'realtor.pipelines.ValidateItemPipeline': 100,

@@ -10,9 +10,9 @@ class RealtorSpider(Spider):
 	
 #	start_urls = ['http://www.realtor.com/soldhomeprices/Flushing_NY?pgsz=50']
 #	start_urls = ['http://www.realtor.com/soldhomeprices/Flushing_NY/pg-2?pgsz=50']     # 5 pages each
-	start_urls = ['http://www.realtor.com/soldhomeprices/Nassau-County_NY/price-200000-2000000/pg-1?pgsz=15']
+	start_urls = ['http://www.realtor.com/soldhomeprices/Nassau-County_NY/price-200000-2000000/pg-31?pgsz=50']
 
-
+# page 31
 
 
 
