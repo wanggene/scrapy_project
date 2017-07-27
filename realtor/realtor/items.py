@@ -13,7 +13,7 @@ class RealtorItem(scrapy.Item):
 	city = scrapy.Field() #
 	state = scrapy.Field() #
 	#nabeigh = scrapy.Field() #
-	propertyType = scrapy.Field() #
+	#propertyType = scrapy.Field() #
 	zipcode = scrapy.Field() #
 	detailslink = scrapy.Field() # 
 	soldPrice = scrapy.Field() #
@@ -25,12 +25,17 @@ class RealtorItem(scrapy.Item):
 	lotunit = scrapy.Field() #
 
 
-	percent_Nearby = scrapy.Field()
-	trend_Nearby = scrapy.Field()
-	days_onmarket = scrapy.Field()
-	onmarket = scrapy.Field()
-	price_change = scrapy.Field()
-	price_trend = scrapy.Field()
+	Detail_1A = scrapy.Field()
+	Detail_1B = scrapy.Field()
+	Detail_2A = scrapy.Field()
+	Detail_2B = scrapy.Field()
+	Detail_3A = scrapy.Field()
+	Detail_3B = scrapy.Field()
+
+	propertyType = scrapy.Field() #
+	year_built = scrapy.Field()
+	school_district = scrapy.Field()
+
 
     # item in 
     #priceCompare = scrapy.Field()
