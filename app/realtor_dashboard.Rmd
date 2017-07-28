@@ -1,0 +1,108 @@
+---
+title: "Long Island Realtor History Explorer"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    #social: menu
+    source_code: embed
+    navbar:
+     - { title: "Realtor.Com", 
+     href: "https://www.realtor.com/", align: left}
+     
+    social: [ "twitter", "facebook","linkedin", "menu" ]
+      
+    runtime: shiny
+---
+
+```{r global, include=FALSE}
+# load data in 'global' chunk so it can be shared by all users of the dashboard
+library(ggplot2)
+library(dplyr)
+library(mgcv)
+library(dygraphs)
+load('realtor_df.Rda')
+
+```
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+sliderInput('soldpriceRange', 'Price Range', min=200000, max=2000000,
+            value=c(300000, 1000000), step=100000, round=0)
+
+sliderInput('bedroom', 'Bedroom', min=0, max=7, value=2)
+
+sliderInput('bathroom', 'Bathroom', min=1, max=5, value=2, step=0.5)
+
+
+
+
+#------------------
+#checkboxInput('jitter', 'Jitter', value = TRUE)
+
+#------------------
+selectInput('x', 'X', names(dataset))
+selectInput('y', 'Y', names(dataset), names(dataset)[[2]])
+selectInput('color', 'Color', c('None', names(dataset)))
+
+
+#-------------------
+selectInput('facet_row', 'Facet Row',
+            c(None='.', names(diamonds[sapply(diamonds, is.factor)])))
+selectInput('facet_col', 'Facet Column',
+            c(None='.', names(diamonds[sapply(diamonds, is.factor)])))
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### Realtor
+
+```{r}
+dataset <- reactive({
+  diamonds[sample(nrow(diamonds), input$sampleSize),]
+})
+
+renderPlot({
+  p <- ggplot(dataset(), aes_string(x=input$x, y=input$y)) + geom_point()
+  
+  if (input$color != 'None')
+    p <- p + aes_string(color=input$color)
+  
+  facets <- paste(input$facet_row, '~', input$facet_col)
+  if (facets != '. ~ .')
+    p <- p + facet_grid(facets)
+  
+  if (input$jitter)
+    p <- p + geom_jitter()
+  if (input$smooth)
+    p <- p + geom_smooth()
+  
+  print(p)
+  
+  dygraph(nhtemp, main = "New Haven Temperatures") %>% 
+  dyRangeSelector(dateWindow = c("1920-01-01", "1960-01-01"))
+  
+  
+  
+  
+})
+
+```
+
+
+
+Column {data-width=300}
+-------------------------------------
+   
+### Map
+
+```{r}
+```   
+ 
+### Date
+    
+```{r}
+```

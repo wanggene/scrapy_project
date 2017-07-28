@@ -10,8 +10,8 @@ class RealtorSpider(Spider):
 	
 #	start_urls = ['http://www.realtor.com/soldhomeprices/Flushing_NY?pgsz=50']
 #	start_urls = ['http://www.realtor.com/soldhomeprices/Flushing_NY/pg-2?pgsz=50']     # 5 pages each
-	start_urls = ['http://www.realtor.com/soldhomeprices/Nassau-County_NY/price-200000-2000000/pg-31?pgsz=50']
-
+	start_urls = ['http://www.realtor.com/soldhomeprices/Nassau-County_NY/price-200000-2000000/sby-10/pg-54?pgsz=50']
+# # by Date descending, 50 links/page
 # page 31
 
 
@@ -49,7 +49,8 @@ class RealtorSpider(Spider):
 
 			#neigbous1 = rows[i].xpath('./div[1]/div[2]/div/div[4]/a[1]/text()').extract_first()# northeastern queens
 			#neigbous2 = rows[i].xpath('./div[1]/div[2]/div/div[4]/a[2]/text()').extract_first() # corona
-			#propertyType = rows[i].xpath('./div[1]/div[2]/div/div[5]/span/text()').extract_first()     
+			#propertyType = rows[i].xpath('.//*[@class="srp-property-type"]/text()').extract_first() # if detail use detail 
+     
 
 			# bedroom = rows[i].xpath('./div[1]/div[2]/div/div[6]/ul/li[1]/span/text()').extract_first()
 			bedroom = rows[i].xpath('.//*[@data-label="property-meta-beds"]/span/text()').extract_first() # corrected
@@ -101,8 +102,8 @@ class RealtorSpider(Spider):
 
 		# following pagination link
 
-		
-		next_page_url = response.xpath('.//span[@class="page current"]/following-sibling::span/a/@href').extract_first()
+		next_page_url = response.xpath('.//span[@class="page current"]/following-sibling::span[1]/a/@href').extract_first()
+		#########next_page_url = response.xpath('.//span[@class="page current"]/following-sibling::span/a/@href').extract_first()
 
 		if next_page_url:   # set up how many page each run                    
 			next_page_url = response.urljoin(next_page_url)
@@ -119,7 +120,7 @@ class RealtorSpider(Spider):
 		soldDate = response.meta['soldDate']
 		state = response.meta['state']
 		zipcode = response.meta['zipcode']
-		#propertyType = response.meta['propertyType']
+		propertyType = response.meta['propertyType'] # pro
 		bedroom = response.meta['bedroom']
 		bathroom = response.meta['bathroom']
 		floorsize = response.meta['floorsize']
@@ -128,17 +129,17 @@ class RealtorSpider(Spider):
 		detailslink = response.meta['detailslink']
 
 		#############
+		
 		details = response.xpath('//*[@id="market-summary-data"]')
 
 		Detail_1A = details.xpath('.//div/div[1]/div/div/div[2]/div/text()').extract_first().strip(' |\n')
-		#percent_Nearby = details.xpath('.//*[@class="col-sm-8"]/div/text()').extract_first().strip(' |\n')
 		Detail_1B = details.xpath('.//div/div[1]/div/div/div[2]/span/text()').extract_first().strip(' |\n')
 
-		Detail_2A = details.xpath('.//div/div[2]/div/div/div[2]/div/text()').extract_first().strip(' |\n')
-		Detail_2B = details.xpath('.//div/div[2]/div/div/div[2]/span/text()').extract_first().strip(' |\n')
+		Detail_2A = details.xpath('.//div/div[2]/div/div/div[2]/div/text()').extract_first()#.strip(' |\n')
+		Detail_2B = details.xpath('.//div/div[2]/div/div/div[2]/span/text()').extract_first()#.strip(' |\n')
 
-		Detail_3A = details.xpath('.//div/div[3]/div/div/div[2]/div/text()').extract_first().strip(' |\n')
-		Detail_3B = details.xpath('.//div/div[3]/div/div/div[2]/span/text()').extract_first().strip(' |\n')
+		Detail_3A = details.xpath('.//div/div[3]/div/div/div[2]/div/text()').extract_first()#.strip(' |\n')
+		Detail_3B = details.xpath('.//div/div[3]/div/div/div[2]/span/text()').extract_first()#.strip(' |\n')
 
 
 		###############
@@ -147,7 +148,7 @@ class RealtorSpider(Spider):
 
 		propertyType = more_details.xpath('.//*[@data-label="property-type"]/div[2]/text()').extract_first()
 		year_built = more_details.xpath('.//*[@data-label="property-year"]/div[2]/text()').extract_first()
-		school_district = more_details.xpath('.//*[@id="ldp-detail-schools"]/ul/li/text()').extract_first().strip(' |\n')
+		school_district = more_details.xpath('.//*[@id="ldp-detail-schools"]/ul/li/text()').extract_first()#.strip(' |\n')
 		
 
 
@@ -177,7 +178,7 @@ class RealtorSpider(Spider):
 		item['soldDate'] = soldDate
 		item['state'] = state
 		item['zipcode'] = zipcode
-#		item['propertyType'] = propertyType
+		item['propertyType'] = propertyType # 
 		item['bedroom'] = bedroom
 		item['bathroom'] = bathroom
 		item['floorsize'] = floorsize
