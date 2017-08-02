@@ -1,0 +1,438 @@
+---
+title: "Realtor New York 2017"
+author: "Jing Wang"
+date: "7/30/2017"
+output: 
+  ioslides_presentation: 
+    widescreen: yes
+---
+
+```{r introduction, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# library
+library(dplyr)
+library(ggplot2)
+library(plotly)
+
+#load data
+load('data/realtor_df.Rda')
+data = dataset %>% filter(soldPrice >= 200000 & soldPrice <=2000000)
+```
+
+## Real Estate Market 2017
+
+- *2017 real estate market in New York area*
+
+- *New York vs. Long Island*
+
+- *Number of sold properties by 2017-07-26: 28909*
+
+- *Number of new listing properties by 2017-07-26: 28909*
+
+## Realtor.com
+
+<h6>Home Page of Realtor.com</h6>
+<br>
+<img src='../image/realtor_home.png'> 
+
+<style> 
+    img {
+        width: 700px;
+    }
+</style>
+
+
+## Web Scrapping In Listing Page Using Scrapy
+
+<h6>Total listing number and pages</h6>
+<br>
+<img src='../image/realtor_nassau.png'>
+
+## Web Scrapping In Listing Page Using Scrapy
+
+<h6>Pagination at the bottom</h6>
+<br>
+<img src='../image/realtor_nassau_bottom.png'>
+
+## 1.1 Number of sold properties by Month
+
+```{r sold_month, echo=FALSE, warning=F, quietly=TRUE, fig.width=4, fig.height=3}
+    # dataset
+
+    # plotting by month
+    g1 = ggplot(data, aes(x = month))
+    g1 + geom_bar(aes(x = month, fill = month)) +
+         theme(legend.position="none")
+    
+```
+
+## 1.2 Number of sold properties by Type
+
+```{r sold_type, echo=FALSE, warning=F,  quietly=TRUE,fig.height= 4, fig.width= 4}
+    # data
+    df = data %>% group_by(propertyType) %>% summarise(total_sold = n())
+    df$propertyType = factor(df$propertyType, levels = df$propertyType[order(df$total_sold,decreasing = TRUE)])
+
+    # plotting
+    g2 = ggplot(df, aes(x = propertyType, y = total_sold))
+    g2 + geom_bar(aes(fill = propertyType), stat = 'identity') +
+         theme(legend.position="none") +
+         theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+## 1.3 Number of sold properties by County
+
+```{r sold_county, echo=FALSE, fig.width=5, fig.height= 4}
+    # data
+    df = data %>% group_by(county) %>% summarise(total_sold = n())
+    df$county = factor(df$county, levels = df$county[order(df$total_sold,decreasing = TRUE)])
+
+    # plotting
+    g2 = ggplot(df, aes(x = county, y = total_sold))
+    g2 + geom_bar(aes(fill = county), stat = 'identity') +
+         theme(legend.position="none") 
+        
+
+```
+## 1.4 Number of sold properties by County ~ Type
+
+```{r sold_county_type, echo=FALSE}
+    # data
+    df = data %>% group_by(county, propertyType) %>% summarise(total_sold = n())
+    #df$propertyType = factor(df$propertyType, levels = df$propertyType[order(df$total_sold,decreasing = TRUE)])
+
+    # plotting
+    g = ggplot(df, aes(x = county , y = total_sold))
+    g + geom_bar(aes(fill = county), stat = 'identity') +
+        facet_wrap( ~ propertyType , nrow=2, scales = 'free_y')   +
+        theme(legend.position="none") +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+## 2.1 Median price change by county in 2017
+
+```{r median_price_county, echo = FALSE, fig.width=8, fig.height=6}
+    # data
+    data2 = data %>% 
+        filter((propertyType == 'Single Family Home')) %>% 
+        filter(bedroom >= 1 & bedroom <= 5) %>%
+        group_by(month, county) %>% 
+        summarise(median_sales_price = median(soldPrice, rm.na=TRUE))
+
+    # plotting
+    g = ggplot(data2, aes(x = month , y = median_sales_price))
+    g + geom_bar(aes(x=month, y= median_sales_price, fill = county), stat='identity') +
+        facet_wrap( ~ county , nrow=2) +
+        theme(legend.position="bottom")
+
+```
+
+## 2.2 Median price change by day in 2017
+
+```{r median_price_day, echo = FALSE, fig.width=8, fig.height=6}
+
+    # Data
+    df2 = data %>% filter(soldPrice <=1000000) %>% 
+        filter((propertyType == 'Single Family Home')) %>% 
+        filter(bedroom >= 1 & bedroom <= 5) %>%
+        group_by(soldDate, county) %>% 
+        summarise(median_sales_price = median(soldPrice, rm.na=TRUE))
+
+    # Plotting
+    g = ggplot(df2, aes(x = soldDate , y = median_price))
+    g + geom_line(aes(x=soldDate, y= median_sales_price, group=county, color=county), stat='identity') +
+        facet_grid(county ~ .)  +
+        theme(legend.position="none")
+```
+
+
+
+
+
+## 2.3 Median price change by type in 2017
+
+```{r median_price_type, echo = FALSE, fig.width=8, fig.height=6}
+    # data
+    data2 = data %>% 
+        #filter((propertyType == 'Single Family Home')) %>% 
+        filter(bedroom >= 0 & bedroom <= 4) %>%
+        group_by(month, propertyType , bedroom) %>% 
+        summarise(median_sales_price = median(soldPrice, rm.na=TRUE))
+
+    # plotting
+    g = ggplot(data2, aes(x = month , y = median_price))
+    g + geom_bar(aes(x=month, y= median_sales_price, fill = propertyType), stat='identity') +
+        facet_wrap( ~ propertyType, nrow=2)  +
+        theme(legend.position="bottom")
+
+```
+
+## 3.1 sfh_floorsize ~ price
+
+```{r analysis_floorsize, echo=FALSE, message=FALSE}
+
+    df = data %>% filter (propertyType == 'Single Family Home') %>% 
+            filter (floorsize >= 1000 & floorsize <= 4000) %>%
+            filter (lotsize >= 1000 & lotsize <= 7000) %>%
+            filter (bedroom >= 2 & bedroom <=5) %>% 
+            filter (bathroom >= 1.5 & bathroom <=3 ) %>% 
+            select (soldPrice, floorsize, lotsize, bedroom, bathroom)
+
+    
+    g = ggplot(df, aes(x = floorsize , y = soldPrice))
+    g + geom_point (aes(x=floorsize, y= soldPrice), size=0.1, alpha =0.5) +
+        facet_grid( bathroom ~ bedroom) + 
+        geom_smooth(method=lm,se=FALSE)  # Add linear regression line
+
+    
+
+```
+
+## 3.2 sfh_lotsize ~ price
+
+```{r analysis_lotsize, echo=FALSE, message=FALSE}
+
+    df = data %>% filter (propertyType == 'Single Family Home') %>% 
+            filter (floorsize >= 1000 & floorsize <= 4000) %>%
+            filter (lotsize >= 1000 & lotsize <= 7000) %>%
+            filter (bedroom >= 2 & bedroom <=5) %>% 
+            filter (bathroom >= 1.5 & bathroom <=3 ) %>% 
+            select (soldPrice, floorsize, lotsize, bedroom, bathroom)
+
+    
+    g = ggplot(df, aes(x = lotsize , y = soldPrice))
+    g + geom_point (aes(x=lotsize, y= soldPrice), size=0.1, alpha =0.5) +
+        facet_grid( bathroom ~ bedroom ) + 
+        geom_smooth(method=lm,se=FALSE) +  # Add linear regression line
+        theme(legend.position="bottom")
+    
+
+```
+
+## 3.3 sfh_floor/lot_size ~ price
+
+
+```{r analysis_fllor_lotsize, echo=FALSE, message=FALSE}
+
+    df = data %>% filter (propertyType == 'Single Family Home') %>% 
+            filter (floorsize >= 1000 & floorsize <= 5000) %>%
+            filter (lotsize >= 1000 & lotsize <= 7000) %>%
+            filter (bedroom >= 1 & bedroom <=5) %>% 
+            filter (bathroom >= 1 & bathroom <=3 ) %>% 
+            select (soldPrice, floorsize, lotsize, bedroom, bathroom) %>% 
+            mutate (floor_lot_ratio = floorsize/lotsize)
+    
+
+    
+    g = ggplot(df, aes(x = floor_lot_ratio , y = soldPrice))
+    g + geom_point (aes(x=floor_lot_ratio, y= soldPrice), size=0.1, alpha =0.5) +
+        facet_grid( bathroom ~ bedroom ) + 
+        geom_smooth(method=lm,se=FALSE) +  # Add linear regression line
+        theme(legend.position="bottom")
+    
+
+```
+### 3.4 county/floorsize ~ sale price
+    
+```{r county/floorsize ~ sale price, echo= FALSE}
+
+    # Data
+    df3.4 = data %>% #filter (propertyType == 'Single Family Home') %>% 
+        filter (floorsize >= 500 & floorsize <= 5000) %>%
+        filter (lotsize >= 1000 & lotsize <= 7000) %>%
+        filter (bedroom >= 1 & bedroom <=5) %>% 
+        filter (bathroom >= 1 & bathroom <=3 ) %>% 
+        select (soldPrice, floorsize, lotsize, bedroom, bathroom, county, propertyType)
+    
+    # Plotting    
+    g = ggplot(df3.4, aes(x = floorsize , y = soldPrice))
+    g + geom_point (aes(x=floorsize, y= soldPrice), size=0.1, alpha =0.5) +
+        facet_wrap( ~ county,  nrow=2) + 
+        geom_smooth(method=lm,se=FALSE) +  # Add linear regression line
+        theme(legend.position="bottom")    
+
+```
+
+
+
+## 3.5 type/floorsize ~ sale price-------------------------------------------------------- NEW
+```{r type/floorsize ~ sale price}
+
+    # Data
+    df3.5 = data %>% #filter (propertyType == 'Single Family Home') %>% 
+        filter (floorsize >= 500 & floorsize <= 5000) %>%
+        filter (lotsize >= 1000 & lotsize <= 7000) %>%
+        filter (bedroom >= 1 & bedroom <=5) %>% 
+        filter (bathroom >= 1 & bathroom <=3 ) %>% 
+        select (soldPrice, floorsize, lotsize, bedroom, bathroom, county, propertyType)
+    
+    # Plotting    
+    g = ggplot(df3.5, aes(x = floorsize , y = soldPrice))
+    g + geom_point (aes(x=floorsize, y= soldPrice), size=0.1, alpha =0.5) +
+        facet_wrap( ~ propertyType,  nrow=2) + 
+        geom_smooth(method=lm,se=FALSE) +  # Add linear regression line
+        theme(legend.position="bottom")   
+
+```
+
+
+
+
+## 4.1 top_median_sale_price by city
+
+
+```{r top_median_sale_price by city}
+
+    # Data
+    df4.1 = data %>% filter (propertyType == 'Single Family Home') %>%
+        filter(county == 'Nassau') %>% 
+        group_by(city) %>% 
+        summarise(median_sales_price = median(soldPrice, rm.na=TRUE)) %>% 
+        arrange(desc(median_sales_price))%>% head(30)
+    
+    df4.1$city = factor(df4.1$city, levels = df4.1$city[order(df4.1$median_sales_price,decreasing = FALSE)])
+    
+    # Plotting    
+    g = ggplot(df4.1, aes(x = city , y = median_sales_price))
+    g + geom_bar(aes(x=city, y= median_sales_price, fill=city), stat = 'identity') +
+        coord_flip() + 
+        theme(legend.position="none")  
+
+
+```
+
+## 4.2 Number of sold properties by zipcode in long island
+
+```{r Number of sold properties by zipcode in long island}
+
+    
+    # data
+    df4.2 = data %>% filter (propertyType == 'Single Family Home') %>%
+        filter(county == 'Nassau') %>% 
+        group_by(zipcode) %>% 
+        summarise(median_sales_price = median(soldPrice, rm.na=TRUE)) %>% 
+        arrange(desc(median_sales_price))%>% head(30)
+    
+    df4.2$zipcode = factor(df4.2$zipcode, levels = df4.2$zipcode[order(df4.2$median_sales_price,decreasing = FALSE)])
+    
+    # plotting
+    g = ggplot(df4.2, aes(x = zipcode, y = median_sales_price))
+    g + geom_bar(aes(x=zipcode, y= median_sales_price, fill=zipcode), stat = 'identity') +
+   
+        coord_flip() + 
+        theme(legend.position="none")  
+
+
+```
+
+
+
+## 5.1 Find the correlation between variables
+```{r Find the correlation between variables}
+library(corrplot)
+
+
+    # data
+    df5.1 = data %>% select(bathroom, bedroom, floorsize, lotsize, soldPrice) %>%
+        filter( bathroom > 0 & bedroom >0 & floorsize >0 & lotsize > 0)
+
+    # plotting
+    corrplot(cor(df5.1), na.label = "NA")
+    
+```
+
+    
+
+## 5.2 scatter plot to find the correlation
+```{r scatter plot to find the correlation, echo=FALSE, message= FALSE}
+library(car)
+    # data
+    df5.2 = data %>% select(bathroom, bedroom, floorsize, lotsize, soldPrice) %>%
+        filter( bathroom > 0 & bedroom >0 & floorsize >0 & lotsize > 0)
+    
+    # plotting   
+    #scatterplotMatrix(df5.2, diagonal='histogram')
+    pairs(df5.2) 
+    
+
+```
+
+
+     
+
+## 5.3 distribution of sold price based on county
+
+```{r distribution of sold price based on county}
+    zoom <- coord_cartesian(xlim = c(200000, 1000000))
+    
+    g1 = ggplot(data, aes(x = soldPrice)) 
+    
+    g1 + geom_histogram(aes(fill = county), bins = 100)
+    
+    g1 + geom_freqpoly(aes(color = county), bins =100)
+    
+    g1 + geom_density(aes(color = county)) + zoom
+
+
+```
+
+
+
+    
+## 5.4 modeling using floorsize
+```{r modeling using floorsize}
+
+    df5.4 = data %>% filter(propertyType == 'Single Family Home') %>% 
+        select(bathroom, bedroom, floorsize, lotsize, soldPrice, county) %>%
+        filter( bedroom >1 & bathroom > 1 & floorsize >500 & floorsize <6000 )
+               # & lotsize >2000 & lotsize < 10000 )
+    
+    g = ggplot(df5.4, aes(x = floorsize, y = soldPrice)) 
+    
+    g + geom_smooth(aes(color=county)) +
+        facet_wrap(~ county, nrow =2)
+    
+    g + geom_smooth(aes(color=county), method = "loess", se = FALSE)
+
+
+```
+
+## map
+
+```{r map}
+# data
+    library(ggplot2)
+    library(dplyr)
+    library(googleVis)
+    library(leaflet)
+    library(shiny)
+    library(maps)
+    
+    df_property = data %>% select(city, state, county, zipcode, soldPrice, propertyid)
+    
+
+    df_zipcode = read.csv('data/zip_codes_states.csv', colClasses = "character")
+
+    # joinn two tables
+    df3 = merge(df_property, df_zipcode, by.x=c("city", "zipcode"), by.y=c("city", "zip_code"))
+    df3$latitude = as.numeric(df3$latitude)
+    df3$longitude = as.numeric(df3$longitude)
+    
+    
+    # aggregate sold numbers based on zipcode
+    df4 = df3 %>% group_by(latitude, longitude) %>% 
+        summarise(total_sold = n(), median_price=median(soldPrice))
+
+
+#
+
+```
+
+
+
+
