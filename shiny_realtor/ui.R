@@ -86,7 +86,7 @@ shinyUI(fluidPage(
                                  
                                  h3("Data", downloadButton("trend_download", label="")),
                                  p(class="text-small", "Tabular searchable data display similar to that found in the original source ",
-                                   a(href="http://www.bls.gov/cps/cpsaat02.htm", target="_blank", "http://www.bls.gov/cps/cpsaat02.htm")),
+                                   a(href="#", target="_blank", "#")),
                                  p(class="text-small", "You can download the data with the download button above."),
                                  dataTableOutput("trend_datatable"),
                                  hr()
@@ -109,7 +109,7 @@ shinyUI(fluidPage(
                                  
                                  h3("Data", downloadButton("occupation_download", label="")),
                                  p(class="text-small", "Tabular searchable data display similar to that found in the original source ",
-                                 a(href="http://www.bls.gov/cps/cpsaat14.htm", target="_blank", "http://www.bls.gov/cps/cpsaat14.htm")),
+                                 a(href="#", target="_blank", "#")),
                                  
                                  p(class="text-small", "You can download the data with the download button above."),
                                  #plotOutput("Time_trend2"),
@@ -149,7 +149,7 @@ shinyUI(fluidPage(
                                  
                                  h3("Data", downloadButton("education_download", label="")),
                                  p(class="text-small", "Tabular searchable data display similar to that found in the original source ",
-                                   a(href="http://www.bls.gov/cps/cpsaat07.htm", target="_blank", "http://www.bls.gov/cps/cpsaat07.htm")),
+                                   a(href="#", target="_blank", "#")),
                                  p(class="text-small", "You can download the data with the download button above."),
                                  #dataTableOutput("education_datatable"),
                                  hr()

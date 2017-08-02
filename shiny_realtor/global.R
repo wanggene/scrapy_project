@@ -50,9 +50,4 @@ choices <- list(
 # =========================================================================
 # server.R variables and functions
 # =========================================================================
-CATEGORYCOLORS <- c("Men" = "#4393C3",
-                    "Women"="#D6604D",
-                    "White"="#1f77b4",
-                    "Asian"="#ff7f0e",
-                    "Hispanic"="#2ca02c",
-                    "Black"="#d62728")
+CATEGORYCOLORS <- c("Men" = "#4393C3")
